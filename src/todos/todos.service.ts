@@ -1,25 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CreateTodoDto } from './todos.dtos';
-import { Todo } from 'src/typeorm';
-import { Repository } from 'typeorm';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { CreateItemDto } from 'src/dto/create-dto';
 
 @Injectable()
 export class TodosService {
-  constructor(
-    @InjectRepository(Todo) private readonly todoRepository: Repository<Todo>,
-  ) {}
-
-  getTodos() {
-    return this.todoRepository.find();
+  constructor(@InjectModel('Todo') private readonly todoModel: Model) {}
+  async findAll(): Promise<Todo[]> {
+    return await this.todoModel.find();
   }
-
-  createTodo(createTodoDto: CreateTodoDto) {
-    const newUser = this.todoRepository.create(createTodoDto);
-    return this.todoRepository.save(newUser);
+  async findOne(id: string): Promise {
+    return await this.todoModel.findOne({ _id: id });
   }
-
-  findTodosById(id: number) {
-    return this.todoRepository.findOne(id);
+  async create(item: CreateItemDto): Promise {
+    const newTodo = new this.todoModel(item);
+    return await newTodo.save();
+  }
+  async delete(id: string): Promise {
+    return await this.todoModel.findByIdAndRemove(id);
+  }
+  async update(id: string, todo: CreateItemDto): Promise {
+    return await this.todoModel.findByIdAndUpdate(id, todo, { new: true });
   }
 }

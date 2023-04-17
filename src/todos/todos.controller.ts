@@ -1,33 +1,41 @@
 import {
-  Body,
   Controller,
   Get,
-  Param,
-  ParseIntPipe,
   Post,
-  UsePipes,
-  ValidationPipe,
+  Put,
+  Delete,
+  Body,
+  Param,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
-import { CreateTodoDto } from './todos.dtos';
+import { CreateItemDto } from 'src/dto/create-dto';
 
-@Controller('todos')
+@Controller('todo')
 export class TodosController {
-  constructor(private readonly todoService: TodosService) {}
+  constructor(private readonly todosService: TodosService) {}
 
   @Get()
-  getUsers() {
-    return this.todoService.getTodos();
+  findAll(): Promise<Todo[]> {
+    return this.todosService.findAll();
   }
 
-  @Get('id/:id')
-  findUsersById(@Param('id', ParseIntPipe) id: number) {
-    return this.todoService.findTodosById(id);
+  @Get(':id')
+  findOne(@Param('id') id): Promise {
+    return this.todosService.findOne(id);
   }
 
-  @Post('create')
-  @UsePipes(ValidationPipe)
-  createUsers(@Body() createtodoDto: CreateTodoDto) {
-    return this.todoService.createTodo(createtodoDto);
+  @Post()
+  create(@Body() createTodoDto: CreateItemDto): Promise {
+    return this.todosService.create(createTodoDto);
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id): Promise {
+    return this.todosService.delete(id);
+  }
+
+  @Put(':id')
+  update(@Body() updateTodoDto: CreateItemDto, @Param('id') id): Promise {
+    return this.todosService.update(id, updateTodoDto);
   }
 }
