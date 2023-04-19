@@ -1,25 +1,41 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateItemDto } from 'src/dto/create-dto';
+import { Body, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Todo } from 'src/entity/Todo.entity';
+import { Repository } from 'typeorm';
+
+export interface TodoInterface {
+  name: string;
+  complete: boolean;
+}
 
 @Injectable()
 export class TodosService {
-  constructor(@InjectModel('Todo') private readonly todoModel: Model) {}
-  async findAll(): Promise<Todo[]> {
-    return await this.todoModel.find();
+  constructor(
+    @InjectRepository(Todo)
+    private todoRepository: Repository<TodoInterface>,
+  ) {}
+  create(todo: TodoInterface): Promise<TodoInterface> {
+    return this.todoRepository.save(this.todoRepository.create(todo));
   }
-  async findOne(id: string): Promise {
-    return await this.todoModel.findOne({ _id: id });
+  findAll(): Promise<TodoInterface[]> {
+    return this.todoRepository.find();
   }
-  async create(item: CreateItemDto): Promise {
-    const newTodo = new this.todoModel(item);
-    return await newTodo.save();
+  update(id: string, data: any): Promise<any> {
+    return this.todoRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        name: data.name,
+      })
+      .where('id = :id', { id })
+      .execute();
   }
-  async delete(id: string): Promise {
-    return await this.todoModel.findByIdAndRemove(id);
-  }
-  async update(id: string, todo: CreateItemDto): Promise {
-    return await this.todoModel.findByIdAndUpdate(id, todo, { new: true });
+  delete(id: string): Promise<any> {
+    return this.todoRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Todo)
+      .where('id = :id', { id })
+      .execute();
   }
 }
