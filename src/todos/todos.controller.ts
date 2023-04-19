@@ -1,41 +1,49 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   Put,
-  Delete,
-  Body,
-  Param,
+  Req,
 } from '@nestjs/common';
-import { TodosService } from './todos.service';
-import { CreateItemDto } from 'src/dto/create-dto';
+import { Request } from 'express';
+import { TodoInterface, TodosService } from './todos.service';
 
-@Controller('todo')
+interface CreateTodoDto {
+  name: string;
+  complete: boolean;
+}
+
+@Controller('cats')
 export class TodosController {
-  constructor(private readonly todosService: TodosService) {}
-
-  @Get()
-  findAll(): Promise<Todo[]> {
-    return this.todosService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id): Promise {
-    return this.todosService.findOne(id);
-  }
+  constructor(private todosService: TodosService) {}
 
   @Post()
-  create(@Body() createTodoDto: CreateItemDto): Promise {
-    return this.todosService.create(createTodoDto);
+  async create(@Body() createTodoDto: CreateTodoDto) {
+    const todo = await this.todosService.create(createTodoDto);
+    if (!todo) {
+      return 'error in creating todo';
+    }
+    return 'todo created successfully';
   }
 
-  @Delete(':id')
-  delete(@Param('id') id): Promise {
-    return this.todosService.delete(id);
+  @Get()
+  async findAll(@Req() request: Request) {
+    const cats: Array<TodoInterface> = await this.todosService.findAll();
+    return cats;
   }
 
   @Put(':id')
-  update(@Body() updateTodoDto: CreateItemDto, @Param('id') id): Promise {
-    return this.todosService.update(id, updateTodoDto);
+  async update(@Param('id') id: string, @Body() body: any) {
+    const newCat: any = await this.todosService.update(id, body);
+    return 'cat updated';
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    await this.todosService.delete(id);
+    return 'cat deleted';
   }
 }
