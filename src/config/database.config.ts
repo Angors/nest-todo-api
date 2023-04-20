@@ -1,4 +1,3 @@
-import { Todo } from 'src/entity/Todo.entity';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
 export const devConfig: PostgresConnectionOptions = {
@@ -6,8 +5,8 @@ export const devConfig: PostgresConnectionOptions = {
   host: 'localhost',
   port: 5432,
   username: 'postgres',
-  password: 'madafelix',
-  database: 'postgres',
-  entities: [Todo],
+  password: '1234',
+  database: 'AWT',
+  entities: ['dist/**/*.entity{.ts,.js}'],
   synchronize: true,
 };
